@@ -14,7 +14,7 @@ const DeviceTable = ({ devices, handleEditDevice, handleDeleteDevice }) => {
   const tableHeaders = ['ID', 'Name', 'Unique ID', 'Status', 'Last Update', 'Actions'];
 
   return (
-    <TableContainer component={Paper}>
+    <TableContainer component={Paper} className="device-table">
       <Table>
         <TableHead>
           <TableRow>
@@ -26,32 +26,22 @@ const DeviceTable = ({ devices, handleEditDevice, handleDeleteDevice }) => {
         <TableBody>
           {devices.map((device) => (
             <TableRow key={device.id}>
-              <TableCell>{device.id}</TableCell>
-              <TableCell>{device.name}</TableCell>
-              <TableCell>{device.uniqueId}</TableCell>
-              <TableCell>{device.status}</TableCell>
-              <TableCell>{device.lastUpdate}</TableCell>
-              <TableCell>
-                <TableCell>
-                  <Button
-                    onClick={() => handleEditDevice(device.id)}
-                    variant="outlined"
-                    color="primary"
-                  >
-                    Edit
-                  </Button>
-                </TableCell>
-                <TableCell>
-                  <Button
-                    onClick={() => handleDeleteDevice(device.id)}
-                    variant="outlined"
-                    color="secondary"
-                  >
-                    Delete
-                  </Button>
-                </TableCell>
-              </TableCell>
-            </TableRow>
+            <TableCell>{device.id}</TableCell>
+            <TableCell>{device.name}</TableCell>
+            <TableCell>{device.uniqueId}</TableCell>
+            <TableCell>{device.status}</TableCell>
+            <TableCell>{device.lastUpdate}</TableCell>
+            <TableCell>
+              <Button onClick={() => handleEditDevice(device.id)} variant="outlined" color="primary">
+                Edit
+              </Button>
+            </TableCell>
+            <TableCell>
+              <Button onClick={() => handleDeleteDevice(device.id)} variant="outlined" color="secondary">
+                Delete
+              </Button>
+            </TableCell>
+          </TableRow>
           ))}
         </TableBody>
       </Table>
