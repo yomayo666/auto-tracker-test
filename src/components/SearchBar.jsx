@@ -1,22 +1,45 @@
 import React, { useState, useEffect } from "react";
 import { TextField, CircularProgress } from "@mui/material";
-import { useNavigate } from "react-router-dom";
-import { fetchDevices } from "../api";
-import { useCallback } from "react";
+import { fetchDevices, fetchDeviceById } from "../api";
+
+const useDebounce = (value, delay) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+};
 
 const SearchBar = ({ onSearch, onError }) => {
   const [searchValue, setSearchValue] = useState("");
-  const [devices, setDevices] = useState([]);
+  const [trimmedValuesString, setTrimmedValuesString] = useState("");
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+
+  const debouncedSearchValue = useDebounce(trimmedValuesString, 300);
 
   useEffect(() => {
-    const fetchDevicesData = async () => {
+    const handleSearch = async () => {
       try {
         setLoading(true);
-        const data = await fetchDevices();
-        setDevices(data);
-        onSearch("", data);
+        let data;
+        console.log(debouncedSearchValue);
+        if (debouncedSearchValue !== "") {
+          const deviceIds = debouncedSearchValue.trim().split(' ');
+          console.log(deviceIds);
+          data = await fetchDeviceById(deviceIds);
+        } else {
+          data = await fetchDevices();
+        }
+
+        onSearch(Array.isArray(data) ? data : [data]);
       } catch (err) {
         onError(err);
       } finally {
@@ -24,48 +47,28 @@ const SearchBar = ({ onSearch, onError }) => {
       }
     };
 
-    fetchDevicesData();
-  }, [onError]);
+    handleSearch();
+  }, [debouncedSearchValue, onError, onSearch]);
 
-  const handleSearchChange = useCallback(
-    async (event) => {
-      {
-        setSearchValue(event.target.value);
-
-        try {
-          setLoading(true);
-          const data = await fetchDevices();
-          setDevices(data);
-
-          if (onSearch) {
-            onSearch(event.target.value, data);
-          }
-
-          const searchIds = event.target.value
-            .split(" ")
-            .filter((id) => id.trim() !== "")
-            .map((id) => encodeURIComponent(id));
-
-          navigate(`/devices`, { state: { ids: searchIds } });
-        } catch (err) {
-          if (onError) {
-            onError(err);
-          }
-        } finally {
-          setLoading(false);
-        }
-      }
-    },
-    [navigate, onSearch, onError]
-  );
+  const handleInputChange = (event) => {
+    const value = event.target.value;
+    // Фильтрация только цифр и пробелов
+    const filteredValue = value.replace(/[^0-9 ]/g , "");
+    setSearchValue(filteredValue);
+    setTrimmedValuesString([...new Set(filteredValue.split(" ").filter(Boolean))].join(" "));
+  };
 
   return (
     <>
       <TextField
-        label="Search by ID"
+        label="Поиск по ID"
         variant="outlined"
         value={searchValue}
-        onChange={handleSearchChange}
+        onChange={handleInputChange}
+        inputProps={{
+          inputMode: "numeric",
+          pattern: "[0-9 ]*"
+        }}
       />
       {loading && <CircularProgress />}
     </>

@@ -37,6 +37,22 @@ export const fetchDevices = async () => {
     throw error;
   }
 };
+export const fetchDeviceById = async (deviceIds) => {
+  try {
+    const queryParams = deviceIds.map(id => `id=${id}`).join('&');
+    const response = await fetch(`${API_URL}/?${queryParams}`, { headers });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to fetch devices. Server response: ${errorText}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
 
 export const addDevice = async (newDeviceData) => {
   try {

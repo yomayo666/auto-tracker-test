@@ -6,32 +6,31 @@ import SnackbarAlert from './SnackbarAlert';
 import { addDevice, updateDevice, deleteDevice } from '../api';
 import CircularProgress from '@mui/material/CircularProgress';
 
+const initialDeviceData = {
+  name: '',
+  uniqueId: '',
+  status: 'offline',
+  lastUpdate: '',
+};
+
 const DeviceList = ({ devices, onAddDevice }) => {
   const [openDialog, setOpenDialog] = useState(false);
-  const [newDeviceData, setNewDeviceData] = useState({
-    name: '',
-    uniqueId: '',
-    status: 'offline',
-    lastUpdate: '',
-  });
+  const [newDeviceData, setNewDeviceData] = useState(initialDeviceData);
   const [isEditing, setIsEditing] = useState(false);
   const [editingDeviceId, setEditingDeviceId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
-  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    severity: 'success',
+    message: '',
+  });
 
   const resetDialogState = () => {
     setIsEditing(false);
     setEditingDeviceId(null);
-    setNewDeviceData({
-      name: '',
-      uniqueId: '',
-      status: 'offline',
-      lastUpdate: new Date().toISOString().slice(0, 19) + 'Z',
-    });
+    setNewDeviceData(initialDeviceData);
   };
 
   const handleOpenDialog = () => {
@@ -56,15 +55,12 @@ const DeviceList = ({ devices, onAddDevice }) => {
     try {
       setLoading(true);
       const newDevice = { ...newDeviceData };
-  
       const addedDevice = await addDevice(newDevice);
       onAddDevice([...devices, addedDevice]);
       handleCloseDialog();
       showSnackbar('Device added successfully', 'success');
     } catch (error) {
-      console.error('Error adding device:', error);
-      setError('Error adding device: ' + error.message);
-      showSnackbar(`Failed to add device. Details:\n${error.message}`, 'error');
+      handleRequestError(error, 'Error adding device');
     } finally {
       setLoading(false);
     }
@@ -88,35 +84,41 @@ const DeviceList = ({ devices, onAddDevice }) => {
       handleCloseDialog();
       showSnackbar('Device updated successfully', 'success');
     } catch (error) {
-      console.error('Error updating device:', error);
-      setError('Error updating device: ' + error.message);
-      showSnackbar(`Failed to update device. Details:\n${error.message}`, 'error');
+      handleRequestError(error, 'Error updating device');
     }
   };
 
   const handleDeleteDevice = async (deviceId) => {
-    console.log(deviceId)
     try {
       await deleteDevice(deviceId);
       const updatedDevices = devices.filter((device) => device.id !== deviceId);
       onAddDevice(updatedDevices);
       showSnackbar('Device deleted successfully', 'success');
     } catch (error) {
-      console.error('Error deleting device:', error);
-      setError('Error deleting device: ' + error.message);
-      showSnackbar(`Failed to delete device. Details:\n${error.message}`, 'error');
+      handleRequestError(error, 'Error deleting device');
     }
   };
 
+  const handleRequestError = (error, defaultMessage) => {
+    console.error(defaultMessage, error);
+    setError(`${defaultMessage}: ${error.message}`);
+    showSnackbar(`Failed to perform the operation. Details:\n${error.message}`, 'error');
+  };
+
   const showSnackbar = (message, severity) => {
-    setSnackbarMessage(message);
-    setSnackbarSeverity(severity);
-    setSnackbarOpen(true);
+    setSnackbar({
+      open: true,
+      severity: severity,
+      message: message,
+    });
   };
 
   const handleCloseSnackbar = () => {
-    setSnackbarOpen(false);
-    setSnackbarMessage('');
+    setSnackbar({
+      open: false,
+      severity: 'success',
+      message: '',
+    });
   };
 
   return (
@@ -140,9 +142,9 @@ const DeviceList = ({ devices, onAddDevice }) => {
         error={error}
       />
       <SnackbarAlert
-        open={snackbarOpen}
-        severity={snackbarSeverity}
-        message={snackbarMessage}
+        open={snackbar.open}
+        severity={snackbar.severity}
+        message={snackbar.message}
         handleClose={handleCloseSnackbar}
       />
       {loading && <CircularProgress />}

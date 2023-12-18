@@ -5,6 +5,7 @@ import DeviceList from "./components/DeviceList";
 import SearchBar from "./components/SearchBar";
 import { useState } from "react";
 import { Snackbar, Alert } from "@mui/material";
+import { useCallback } from "react";
 import Home from "./components/Home";
 const ErrorPage = () => (
   <div>
@@ -17,33 +18,29 @@ const App = () => {
   const [error, setError] = useState(null);
   const isDevicesPage = useMatch("/devices");
 
-  const handleDeleteDevice = (deviceId) => {
-    const updatedDevices = filteredDevices.filter(
-      (device) => device.id !== deviceId
-    );
-    setFilteredDevices(updatedDevices);
-  };
+  const handleDeleteDevice = useCallback(
+    (deviceId) => {
+      const updatedDevices = filteredDevices.filter(
+        (device) => device.id !== deviceId
+      );
+      setFilteredDevices(updatedDevices);
+    },
+    [filteredDevices]
+  );
 
-  const handleAddDevice = (newDevice) => {
-    setFilteredDevices((prevDevices) => [...prevDevices, newDevice]);
-  };
+  const handleAddDevice = useCallback(
+    (newDevice) => {
+      setFilteredDevices((prevDevices) => [...prevDevices, newDevice]);
+    },
+    []
+  );
 
-  const handleSearch = (searchValue, devices) => {
-    const filteredDevices = filterDevices(searchValue, devices);
-    setFilteredDevices(filteredDevices);
-  };
-  const filterDevices = (searchValue, devices) => {
-    if (!searchValue) {
-      return devices;
-    }
-
-    const searchIds = searchValue.split(" ").filter((id) => id.trim() !== "");
-    const uniqueIdsSet = new Set(searchIds);
-
-    return devices.filter((device) =>
-      uniqueIdsSet.has(device.id.toString().toLowerCase())
-    );
-  };
+  const handleSearch = useCallback(
+    (devices) => {
+      setFilteredDevices(devices);
+    },
+    []
+  );
 
   const handleCloseSnackbar = () => {
     setError(null);
