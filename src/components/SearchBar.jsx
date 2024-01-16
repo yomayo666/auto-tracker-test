@@ -7,11 +7,13 @@ const useDebounce = (value, delay) => {
 
   useEffect(() => {
     const handler = setTimeout(() => {
+      console.log(handler, '2')
       setDebouncedValue(value);
     }, delay);
 
     return () => {
       clearTimeout(handler);
+      console.log(handler, '1')
     };
   }, [value, delay]);
 
@@ -32,7 +34,7 @@ const SearchBar = ({ onSearch, onError }) => {
         let data;
         console.log(debouncedSearchValue);
         if (debouncedSearchValue !== "") {
-          const deviceIds = debouncedSearchValue.trim().split(' ');
+          const deviceIds = debouncedSearchValue.split(' ');
           console.log(deviceIds);
           data = await fetchDeviceById(deviceIds);
         } else {
@@ -41,6 +43,7 @@ const SearchBar = ({ onSearch, onError }) => {
 
         onSearch(Array.isArray(data) ? data : [data]);
       } catch (err) {
+        console.error("Error during search:", err);
         onError(err);
       } finally {
         setLoading(false);
@@ -52,7 +55,6 @@ const SearchBar = ({ onSearch, onError }) => {
 
   const handleInputChange = (event) => {
     const value = event.target.value;
-    // Фильтрация только цифр и пробелов
     const filteredValue = value.replace(/[^0-9 ]/g , "");
     setSearchValue(filteredValue);
     setTrimmedValuesString([...new Set(filteredValue.split(" ").filter(Boolean))].join(" "));
