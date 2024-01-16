@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/auto-tracker-test/static/css/main.8dba8015.css",
+    "main.js": "/auto-tracker-test/static/js/main.b4daf3b1.js",
+    "static/js/787.02128267.chunk.js": "/auto-tracker-test/static/js/787.02128267.chunk.js",
+    "index.html": "/auto-tracker-test/index.html",
+    "main.8dba8015.css.map": "/auto-tracker-test/static/css/main.8dba8015.css.map",
+    "main.b4daf3b1.js.map": "/auto-tracker-test/static/js/main.b4daf3b1.js.map",
+    "787.02128267.chunk.js.map": "/auto-tracker-test/static/js/787.02128267.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.8dba8015.css",
+    "static/js/main.b4daf3b1.js"
+  ]
+}
